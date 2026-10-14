@@ -31,6 +31,14 @@ Before enabling real transfers, implement these controls on the server (not in t
 - Persist only provider-returned trace/reference numbers, use an append-only audit ledger, encrypt sensitive values at rest, and redact account numbers from application logs.
 - Enforce authorization, step-up authentication, rate limits, velocity limits, amount limits, reconciliation, monitoring, and a failure/reversal workflow before funds are made available.
 
+## Debug withdrawals, consent, and multi-rail routing
+
+The app is currently **locked in Debug Mode**. Its Send Cash flow exposes simulated routing choices for GoTyme, Maya, and GCash, while Withdrawals demonstrates a five-member unanimous-consent workflow. The simulated consent button exists only to exercise the interface; it is not an approval mechanism and cannot release funds. All receipts, provider-like IDs, history entries, and unidentified-withdrawal alerts are session-only demonstrations.
+
+The History screen contains a simulated hash per event to make the audit-trail UX testable. This is **not a blockchain** and cannot provide immutability from a browser. Do not put account numbers, personal information, provider secrets, or receipts on a public blockchain. A production system should instead use an append-only server ledger (hash-linked, encrypted, access controlled, and regularly reconciled) and, only if a genuine compliance need exists, anchor a digest of a batch to a permissioned ledger under legal/security review.
+
+For live GoTyme, Maya, or GCash support, Bankada needs written commercial/API access for each provider. The server should normalize those provider APIs behind one connector interface; store credentials in a secrets manager; use per-provider idempotency keys and destination verification; verify signed webhooks; independently reconcile source-account transactions; and create a high-severity incident when an observed withdrawal has no matching Bankada authorization. The incident must notify all group members with masked fields, freeze further releases where appropriate, preserve the raw event securely, and escalate to provider support and the group according to the approved incident policy.
+
 ## Build quality checklist
 
 Documentation (30%), technical soundness (60%), and infrastructure/deployment (10%) are reflected in the project structure and roadmap. Before production: add unit/component tests, Supabase migrations and RLS policies, CI, error monitoring, accessibility checks, and App Store/Play Store release configuration.
