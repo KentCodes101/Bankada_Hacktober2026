@@ -17,6 +17,16 @@ npm install
 npm run dev
 ```
 
+## Enable authentication
+
+1. Create or select a project in [Supabase](https://supabase.com/dashboard).
+2. In **Project Settings → API**, copy the project URL and the anon (or publishable) key.
+3. Copy `.env.example` to `.env.local`, then replace the two placeholder values. Do not commit `.env.local`.
+4. In **Authentication → URL Configuration**, add `http://localhost:5173` to the allowed redirect URLs. Configure an email provider in **Authentication → Providers**; email/password is enabled by default for a new project.
+5. Restart the Vite server. New accounts will receive Supabase's confirmation email when confirmation is enabled; after confirming, they can sign in and their session persists across reloads.
+
+The browser uses only the public anon/publishable key. Never put a Supabase service-role key in a `VITE_` variable or in client-side code.
+
 The current slice is a responsive product prototype with working tab navigation, approval interaction, receipt-scan action, and mobile layout. Production integrations should be added through an API boundary rather than exposing secrets in the client.
 
 ## GoTyme transfer sandbox

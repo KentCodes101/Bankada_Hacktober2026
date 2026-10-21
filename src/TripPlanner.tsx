@@ -58,7 +58,7 @@ export function TripPlanner({ fundId }: { fundId: string }) {
   const money = (minor: number) => {
     const currency = reply?.budget.currency ?? 'PHP'
     const formatter = new Intl.NumberFormat(undefined, { style: 'currency', currency })
-    const fractionDigits = formatter.resolvedOptions().maximumFractionDigits
+    const fractionDigits = formatter.resolvedOptions().maximumFractionDigits ?? 2
     return formatter.format(minor / (10 ** fractionDigits))
   }
 
