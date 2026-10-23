@@ -148,7 +148,7 @@ export function Dashboard({ user, onOpenWorkspace, onSignOut }: DashboardProps) 
       <div className="ledger-table-footer"><span>Showing the latest {data.contributions.length} receipt entries</span><span><i className="fa-solid fa-money-bill-wave icon-fa" aria-hidden="true" /> Log receipts for transparency</span></div>
     </section>
 
-    <footer className="ledger-footer"><span>Bankada is a receipt tracker and shared ledger. It does not store, custody, or move funds.</span><span>How it works <i className="fa-solid fa-arrow-up-right-from-square icon-fa" aria-hidden="true" /></span></footer>
+    <footer className="ledger-footer"><span>Bankada is a receipt tracker and shared ledger. It does not store, custody, or move funds.</span></footer>
 
     {signOutOpen && <div className="modal-backdrop" role="presentation" onClick={() => setSignOutOpen(false)}><div className="signout-confirmation" role="dialog" aria-modal="true" aria-labelledby="ledger-signout-title" onClick={event => event.stopPropagation()}><h2 id="ledger-signout-title">Sign out of Bankada?</h2><p>You’ll need to log in again to access your dashboard.</p><div className="signout-confirmation-actions"><button type="button" className="signout-cancel" onClick={() => setSignOutOpen(false)}>Cancel</button><button type="button" className="signout-confirm" onClick={onSignOut}>Sign out</button></div></div></div>}
   </main>
