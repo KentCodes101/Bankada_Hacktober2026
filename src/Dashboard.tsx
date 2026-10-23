@@ -1,8 +1,12 @@
+import { useState } from 'react'
+import type { User } from '@supabase/supabase-js'
+import { BankadaLogo } from './components/common/BankadaLogo'
 import { useReceiptDashboardData } from './hooks/useReceiptDashboardData'
 import './dashboard.css'
 import './theme-overrides.css'
 
 type DashboardProps = {
+  user: User
   onOpenWorkspace: () => void
   onSignOut: () => void
 }
@@ -10,7 +14,9 @@ type DashboardProps = {
 const formatMoney = (amount: number, currency = 'PHP') => new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount)
 const formatDate = (date: string) => new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date))
 
-export function Dashboard({ onOpenWorkspace, onSignOut }: DashboardProps) {
+export function Dashboard({ user, onOpenWorkspace, onSignOut }: DashboardProps) {
+  const [signOutOpen, setSignOutOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const data = useReceiptDashboardData()
   const progress = data.fund?.target ? Math.min(100, (data.total / data.fund.target) * 100) : 0
   const accountName = import.meta.env.VITE_DESIGNATED_ACCOUNT_NAME || 'Designated group account'
@@ -49,13 +55,20 @@ export function Dashboard({ onOpenWorkspace, onSignOut }: DashboardProps) {
 
   return <main className="ledger-dashboard">
     <header className="ledger-topbar">
-      <a className="ledger-brand" href="/" aria-label="Bankada home"><img className="ledger-brand-logo" src="/bankada-logo.png" alt="Bankada Logo" /><span>Bankada</span></a>
+      <a className="ledger-brand" href="/" aria-label="Bankada home"><BankadaLogo size="sm" showText /></a>
       <div className="ledger-topbar-right">
         <span className={`ledger-mode ${data.isDemo ? 'demo' : ''}`}><span />{data.isDemo ? 'Demo view' : 'Ledger only'}</span>
         <button className="ledger-workspace-button" type="button" onClick={onOpenWorkspace}>Manage group</button>
-        <button className="ledger-workspace-button" type="button" onClick={onSignOut}>Sign out</button>
-        <button className="ledger-avatar" aria-label={`${data.name}, ${data.role}`}>{data.name.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase()}</button>
-        <i className="fa-solid fa-chevron-down icon-fa" aria-hidden="true" />
+        <div className="ledger-profile-menu">
+          <button className="ledger-avatar" type="button" aria-label="Open profile menu" aria-expanded={isDropdownOpen} onClick={() => setIsDropdownOpen(open => !open)}>
+            {user.user_metadata.avatar_url ? <img className="user-avatar-img" src={user.user_metadata.avatar_url} alt="" aria-hidden="true" /> : user.user_metadata.avatar_emoji || data.name.split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase()}
+          </button>
+          {isDropdownOpen && <div className="ledger-profile-dropdown" role="menu">
+            <span className="ledger-profile-email">{user.email}</span>
+            <span className="ledger-profile-divider" aria-hidden="true" />
+            <button type="button" role="menuitem" onClick={() => { setIsDropdownOpen(false); setSignOutOpen(true) }}>Sign out</button>
+          </div>}
+        </div>
       </div>
     </header>
 
@@ -144,5 +157,6 @@ export function Dashboard({ onOpenWorkspace, onSignOut }: DashboardProps) {
 
     <footer className="ledger-footer"><span>Bankada is a receipt tracker and shared ledger. It does not store, custody, or move funds.</span><a href="#designated-account-title">How it works <i className="fa-solid fa-arrow-up-right-from-square icon-fa" aria-hidden="true" /></a></footer>
 
+    {signOutOpen && <div className="modal-backdrop" role="presentation" onClick={() => setSignOutOpen(false)}><div className="signout-confirmation" role="dialog" aria-modal="true" aria-labelledby="ledger-signout-title" onClick={event => event.stopPropagation()}><h2 id="ledger-signout-title">Sign out of Bankada?</h2><p>You’ll need to log in again to access your dashboard.</p><div className="signout-confirmation-actions"><button type="button" className="signout-cancel" onClick={() => setSignOutOpen(false)}>Cancel</button><button type="button" className="signout-confirm" onClick={onSignOut}>Sign out</button></div></div></div>}
   </main>
 }

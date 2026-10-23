@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { AlertTriangle, ArrowRight, Bell, Check, ChevronRight, CircleAlert, GitBranch, HandCoins, History, Landmark, LockKeyhole, MapPin, Plus, Receipt, ShieldCheck, Sparkles, ThumbsUp, Users, UsersRound, WalletCards, X, Zap } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Check, ChevronRight, CircleAlert, GitBranch, HandCoins, History, Landmark, LockKeyhole, MapPin, Plus, Receipt, ShieldCheck, Sparkles, ThumbsUp, Users, UsersRound, WalletCards, X, Zap, Upload } from 'lucide-react'
 import { createRoot } from 'react-dom/client'
 import { TripPlanner } from './TripPlanner'
 import { GroupHub } from './GroupHub'
 import { GroupSavingsHistory, GroupSavingsOverview, ReceiptTransactionForm } from './GroupSavings'
-import { FloatingChatIcon } from './components/FloatingChatIcon'
 import { Dashboard as LedgerDashboard } from './Dashboard'
+import { SinkingFunds } from './SinkingFunds'
+import { BankadaLogo } from './components/common/BankadaLogo'
 import './styles.css'
 import './auth.css'
 
 import { createClient, type User } from '@supabase/supabase-js'
 
+const FloatingChatIcon = (_props: { isOpen?: boolean; onClick?: () => void }) => null
 const cleanEnv = (value: unknown) => typeof value === 'string' ? value.trim().replace(/^['\"]|['\"]$/g, '') : ''
 const supabaseUrl = cleanEnv(import.meta.env.VITE_SUPABASE_URL).replace(/\/$/, '')
 const supabaseAnonKey = cleanEnv(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY)
@@ -30,7 +32,6 @@ const USER_ACCOUNT = { label: 'Kent M. personal account', last4: '9036' }
 const MEMBERS = ['Kent', 'Jasmine', 'Alex', 'Marco', 'Bea']
 const AVATARS = ['🦊', '🐼', '🐨', '🐸', '🐯', '🐰', '🐻', '🐱']
 const OTP_TTL_SECONDS = 180
-const funds = [{ name: 'Japan trip', amount: 52400, goal: 80000, icon: '✈', color: '#e7f6ef' }, { name: 'House repairs', amount: 18600, goal: 30000, icon: '⌂', color: '#fff0e4' }, { name: 'Emergency fund', amount: 42000, goal: 50000, icon: '☂', color: '#e9efff' }]
 
 const php = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' })
 const money = (n: number) => php.format(n), mask = (last4: string) => `•••• ${last4}`
@@ -40,6 +41,7 @@ const ledgerEntry = (kind: string, status: string, amount: number): LedgerItem =
 
 function LandingPage({ user, passwordRecovery, onPasswordResetComplete }: { user: User | null; passwordRecovery: boolean; onPasswordResetComplete: () => void }) {
   const [showModal, setShowModal] = useState(false);
+  const [activeModal, setActiveModal] = useState<'features' | 'how-it-works' | 'why-bankada' | 'open-source' | null>(null)
   const [isSignUp, setIsSignUp] = useState(true); // Default to sign up so new users land here!
   const [stage, setStage] = useState<'credentials' | 'verify' | 'forgot-password' | 'reset-password'>(passwordRecovery ? 'reset-password' : 'credentials')
   const [username, setUsername] = useState('')
@@ -88,6 +90,15 @@ function LandingPage({ user, passwordRecovery, onPasswordResetComplete }: { user
     const interval = window.setInterval(updateRemaining, 1000)
     return () => window.clearInterval(interval)
   }, [stage, otpDeadline])
+
+  useEffect(() => {
+    if (!showModal) return
+    const dismissOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowModal(false)
+    }
+    window.addEventListener('keydown', dismissOnEscape)
+    return () => window.removeEventListener('keydown', dismissOnEscape)
+  }, [showModal])
 
   const openAuthModal = (signupMode: boolean) => {
     setIsSignUp(signupMode);
@@ -194,8 +205,6 @@ function LandingPage({ user, passwordRecovery, onPasswordResetComplete }: { user
     }
   }
 
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!supabase) {
@@ -268,13 +277,13 @@ function LandingPage({ user, passwordRecovery, onPasswordResetComplete }: { user
     <div className="landing-shell">
       <nav className="landing-nav">
         <button className="landing-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <span className="brand-mark">B</span><span>bankada</span>
+          <BankadaLogo size="sm" showText />
         </button>
         <div className="nav-links">
-          <button onClick={() => scrollTo('features')}>Features</button>
-          <button onClick={() => scrollTo('how-it-works')}>How It Works</button>
-          <button onClick={() => scrollTo('why-bankada')}>Why Bankada</button>
-          <button onClick={() => scrollTo('open-source')}>Open Source</button>
+          <button onClick={() => setActiveModal('features')}>Features</button>
+          <button onClick={() => setActiveModal('how-it-works')}>How It Works</button>
+          <button onClick={() => setActiveModal('why-bankada')}>Why Bankada</button>
+          <button onClick={() => setActiveModal('open-source')}>Open Source</button>
         </div>
         <div className="nav-actions">
           <button className="nav-signin" onClick={() => openAuthModal(false)}>Log In</button>
@@ -289,16 +298,16 @@ function LandingPage({ user, passwordRecovery, onPasswordResetComplete }: { user
           <p className="hero-subcopy">Pool funds with your barkada, verify transfer receipts instantly with OpenAI Vision, and democratic-vote on every withdrawal—all in one open-source ledger.</p>
           <div className="hero-buttons">
             <button className="primary hero-button" onClick={() => openAuthModal(true)}>Start a Group Fund <ArrowRight size={17}/></button>
-            <button className="link-button" onClick={() => scrollTo('how-it-works')}>How It Works <ChevronRight size={16}/></button>
+            <button className="link-button" onClick={() => setActiveModal('how-it-works')}>How It Works <ChevronRight size={16}/></button>
           </div>
         </div>
       </header>
 
       {showModal && (
-        <div className="modal-backdrop" onClick={() => { if (stage === 'credentials') setShowModal(false) }}>
+        <div className="modal-backdrop" onClick={event => { if (event.target === event.currentTarget) setShowModal(false) }}>
           <div className="signin-modal" onClick={e => e.stopPropagation()}>
-            {stage !== 'verify' && stage !== 'reset-password' && <button className="modal-close" onClick={() => setShowModal(false)}><X size={19}/></button>}
-            <span className="modal-mark"><span className="brand-mark">B</span></span>
+            {stage !== 'reset-password' && <button type="button" className="modal-close" aria-label="Close modal" onClick={() => setShowModal(false)}>✕</button>}
+            <BankadaLogo size="md" className="auth-modal-brand" />
 
             <h2>{stage === 'verify' ? 'Verify your email' : stage === 'forgot-password' ? 'Reset your password' : stage === 'reset-password' ? 'Set a new password' : isSignUp ? 'Create your bankada account' : 'Welcome back to bankada'}</h2>
             <p>{stage === 'verify' ? `Enter the code sent to ${email}. It expires in 3 minutes.` : stage === 'forgot-password' ? 'Enter your email and we’ll send a link to reset your password.' : stage === 'reset-password' ? 'Choose a new password for your Bankada account.' : isSignUp ? 'Create an account with your email and password. We’ll email you a verification code.' : 'Log in with your email and password.'}</p>
@@ -338,14 +347,68 @@ function LandingPage({ user, passwordRecovery, onPasswordResetComplete }: { user
           </div>
         </div>
       )}
+
+      {activeModal && <div className="landing-info-backdrop" role="presentation" onClick={() => setActiveModal(null)}>
+        <section className="landing-info-modal" role="dialog" aria-modal="true" aria-labelledby="landing-info-title" onClick={event => event.stopPropagation()}>
+          <button type="button" className="landing-info-close" aria-label="Close" onClick={() => setActiveModal(null)}>✕</button>
+          <h2 id="landing-info-title">{{
+            features: 'Core Features',
+            'how-it-works': 'How Bankada Works',
+            'why-bankada': 'Why Choose Bankada?',
+            'open-source': 'Open Source & Community Driven',
+          }[activeModal]}</h2>
+          {activeModal === 'features' && <ul>
+            <li><strong>AI OCR Receipt Verification:</strong> Instantly parse GCash, Maya, and bank transfer receipts to auto-log contributions.</li>
+            <li><strong>Democratic Withdrawal Voting:</strong> Group members vote on every fund release before money is approved.</li>
+            <li><strong>Shared Transparency Ledger:</strong> Real-time receipt tracking and contribution charts visible to all barkada members.</li>
+          </ul>}
+          {activeModal === 'how-it-works' && <ol>
+            <li><strong>Step 1: Create a Barkada</strong> — Set a group savings target for trips, emergencies, or events.</li>
+            <li><strong>Step 2: Transfer & Upload</strong> — Send money using your preferred app (GCash/Maya) and upload the receipt screenshot.</li>
+            <li><strong>Step 3: AI Auto-Verification</strong> — Our OCR AI verifies the amount and reference number to update the ledger instantly.</li>
+          </ol>}
+          {activeModal === 'why-bankada' && <ul>
+            <li><strong>Zero Banking Custody:</strong> Bankada never holds or touches your money—we track submitted receipts neutrally.</li>
+            <li><strong>No Awkward Conversations:</strong> Eliminate manual calculations, spreadsheets, and constant follow-ups.</li>
+            <li><strong>100% Free & Transparent:</strong> Built specifically for group financial clarity.</li>
+          </ul>}
+          {activeModal === 'open-source' && <>
+            <p>Bankada is built transparently for Hacktoberfest 2026. Anyone can inspect, audit, or contribute to our codebase on GitHub.</p>
+            <a className="primary landing-github-link" href="https://github.com/KentCodes101/Bankada_Hacktober2026" target="_blank" rel="noreferrer">View GitHub Repository <ArrowRight size={16}/></a>
+          </>}
+        </section>
+      </div>}
     </div>
   )
 }
 
 function ProfileSetup({ user, onComplete }: { user: User; onComplete: (user: User) => void }) {
   const [avatar, setAvatar] = useState(String(user.user_metadata.avatar_emoji ?? AVATARS[0]))
+  const [avatarUrl, setAvatarUrl] = useState<string>(String(user.user_metadata.avatar_url ?? ''))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  async function selectPhoto(file?: File) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setError('Choose an image file.'); return }
+    try {
+      const image = await createImageBitmap(file)
+      const canvas = document.createElement('canvas')
+      canvas.width = 256
+      canvas.height = 256
+      const context = canvas.getContext('2d')
+      if (!context) throw new Error('Could not prepare that photo.')
+      const scale = Math.max(256 / image.width, 256 / image.height)
+      const width = image.width * scale
+      const height = image.height * scale
+      context.drawImage(image, (256 - width) / 2, (256 - height) / 2, width, height)
+      image.close()
+      setAvatarUrl(canvas.toDataURL('image/webp', 0.78))
+      setError('')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not read that photo.')
+    }
+  }
 
   async function saveProfile(event: React.FormEvent) {
     event.preventDefault()
@@ -357,7 +420,7 @@ function ProfileSetup({ user, onComplete }: { user: User; onComplete: (user: Use
     setError('')
     try {
       const { data, error: updateError } = await supabase.auth.updateUser({
-        data: { avatar_emoji: avatar },
+        data: { avatar_emoji: avatar, avatar_url: avatarUrl || null },
       })
       if (updateError) throw updateError
       onComplete(data.user)
@@ -369,7 +432,7 @@ function ProfileSetup({ user, onComplete }: { user: User; onComplete: (user: Use
   }
 
   return <main className="profile-shell">
-    <header className="profile-brand"><span className="brand-mark">B</span><span>bankada</span></header>
+    <header className="profile-brand"><BankadaLogo size="sm" showText /></header>
     <section className="profile-card">
       <p className="landing-kicker"><span className="kicker-dot"/> YOUR ACCOUNT IS VERIFIED</p>
       <h1>Make it yours</h1>
@@ -378,10 +441,15 @@ function ProfileSetup({ user, onComplete }: { user: User; onComplete: (user: Use
         <fieldset className="avatar-picker">
           <legend>Choose an avatar</legend>
           <div className="avatar-options">
-            {AVATARS.map(option => <button key={option} type="button" className={avatar === option ? 'avatar-option selected' : 'avatar-option'}
-              aria-label={`Choose ${option} avatar`} aria-pressed={avatar === option} onClick={() => setAvatar(option)}>{option}</button>)}
+            {AVATARS.map(option => <button key={option} type="button" className={!avatarUrl && avatar === option ? 'avatar-option selected' : 'avatar-option'}
+              aria-label={`Choose ${option} avatar`} aria-pressed={!avatarUrl && avatar === option} onClick={() => { setAvatar(option); setAvatarUrl('') }}>{option}</button>)}
           </div>
         </fieldset>
+        <label className={`avatar-upload-tile${avatarUrl ? ' selected' : ''}`} onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); void selectPhoto(event.dataTransfer.files[0]) }}>
+          {avatarUrl ? <img src={avatarUrl} alt="Selected custom avatar preview" /> : <Upload size={20} />}
+          <span>Upload custom photo</span><small>Choose or drop an image from your device</small>
+          <input type="file" accept="image/*" onChange={event => void selectPhoto(event.currentTarget.files?.[0])} />
+        </label>
         {error && <p className="auth-error" role="alert">{error}</p>}
         <button type="submit" className="primary modal-button" disabled={loading}>{loading ? 'Saving profile…' : 'Save profile and continue'} <ArrowRight size={16}/></button>
       </form>
@@ -390,21 +458,30 @@ function ProfileSetup({ user, onComplete }: { user: User; onComplete: (user: Use
 }
 
 function WorkspaceDashboard({ user, onSignOut, onOpenLedger }: { user: User; onSignOut: () => void; onOpenLedger: () => void }) {
-  const [tab, setTab] = useState<Tab>('Overview'); const [receipt, setReceipt] = useState<ReceiptType | null>(null); const [toast, setToast] = useState(''); const [ledger, setLedger] = useState<LedgerItem[]>([ledgerEntry('Group savings deposit', 'Simulated', 25000)]); const [withdrawal, setWithdrawal] = useState<{ amount: number; rail: Rail; consents: number } | null>(null); const [alert, setAlert] = useState<LedgerItem | null>(null); const [plannerOpen, setPlannerOpen] = useState(false); const [signOutConfirmationOpen, setSignOutConfirmationOpen] = useState(false)
+  const [tab, setTab] = useState<Tab>('Overview'); const [receipt, setReceipt] = useState<ReceiptType | null>(null); const [toast, setToast] = useState(''); const [ledger, setLedger] = useState<LedgerItem[]>([ledgerEntry('Group savings deposit', 'Simulated', 25000)]); const [withdrawal, setWithdrawal] = useState<{ amount: number; rail: Rail; consents: number } | null>(null); const [alert, setAlert] = useState<LedgerItem | null>(null); const [plannerOpen, setPlannerOpen] = useState(false); const [signOutConfirmationOpen, setSignOutConfirmationOpen] = useState(false); const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(''), 2600) }
   const complete = (kind: ReceiptType['kind'], rail: Rail, amount: number, target: string) => { const r: ReceiptType = { kind, rail, amount, fee: 0, traceId: generateId('DBG-TRACE'), referenceNo: generateId('DBG-REF'), date: now(), target }; setReceipt(r); setLedger(prev => [ledgerEntry(kind, 'Simulated — no funds moved', amount), ...prev]) }
   const createWithdrawal = (amount: number, rail: Rail) => { setWithdrawal({ amount, rail, consents: 1 }); setLedger(prev => [ledgerEntry('Withdrawal request', 'Awaiting unanimous consent', amount), ...prev]); notify('Withdrawal request created. Your consent is recorded.') }
   const addConsent = () => { if (!withdrawal) return; const consents = withdrawal.consents + 1; if (consents === MEMBERS.length) { complete('Group withdrawal', withdrawal.rail, withdrawal.amount, `${USER_ACCOUNT.label} ${mask(USER_ACCOUNT.last4)}`); setWithdrawal(null); notify('All members consented. Debug withdrawal simulated.') } else setWithdrawal({ ...withdrawal, consents }) }
   const reportUnknown = () => { const event = { ...ledgerEntry('Unidentified withdrawal', 'Alerted all members — simulated', 1750), traceId: generateId('DBG-TRACE'), referenceNo: generateId('DBG-REF') }; setAlert(event); setLedger(prev => [event, ...prev]); notify('Unidentified withdrawal alert sent to all members.') }
   return <main className="app-shell">
-    <header className="topbar"><div className="brand"><span className="brand-mark">B</span><span>bankada</span></div>
-      <div className="top-actions"><button className="icon-btn" aria-label="Notifications" onClick={() => tab !== 'Withdrawals' && notify('No new secure alerts')}><Bell size={19}/></button>
-        <span className="account-email">{user.email}</span><button className="auth-signout" onClick={onOpenLedger}>Ledger</button><button className="auth-signout" onClick={() => setSignOutConfirmationOpen(true)}>Sign out</button>
-        <span className="avatar" aria-label={`${user.user_metadata.full_name} avatar`}>{user.user_metadata.avatar_emoji}</span>
+    <header className="topbar"><div className="brand"><BankadaLogo size="sm" showText /></div>
+      <div className="top-actions">
+        <button className="auth-signout" onClick={onOpenLedger}>Ledger</button>
+        <div className="profile-menu">
+          <button type="button" className="profile-pill" aria-label="Open profile menu" aria-expanded={isDropdownOpen} onClick={() => setIsDropdownOpen(open => !open)}>
+            <span className="profile-avatar" aria-hidden="true">{user.user_metadata.avatar_url ? <img className="user-avatar-img" src={user.user_metadata.avatar_url} alt=""/> : user.user_metadata.avatar_emoji || AVATARS[0]}</span>
+          </button>
+          {isDropdownOpen && <div className="profile-dropdown" role="menu">
+            <span className="profile-email">{user.email}</span>
+            <span className="profile-divider" aria-hidden="true" />
+            <button type="button" className="profile-signout" role="menuitem" onClick={() => { setIsDropdownOpen(false); setSignOutConfirmationOpen(true) }}>Sign out</button>
+          </div>}
+        </div>
       </div>
     </header>
     <section className="hero"><div><p className="eyebrow">GROUP SAVINGS DASHBOARD</p>
-      <h1>Good morning, {user.user_metadata.full_name} <span>✦</span></h1>
+      <h1>Group Savings Dashboard</h1>
       <p className="muted">Group savings change only when a member submits a receipt. Bankada never accesses a bank or wallet.</p></div>
       <div className="sync"><span className="online-dot"/> Secure session</div>
     </section>
@@ -420,7 +497,7 @@ function WorkspaceDashboard({ user, onSignOut, onOpenLedger }: { user: User; onS
       <TripPlanner fundId={import.meta.env.VITE_TRIP_FUND_ID ?? ""}/>
     </div>
     <FloatingChatIcon isOpen={plannerOpen} onClick={() => setPlannerOpen(open => !open)}/>
-    <footer><ShieldCheck size={15}/> Savings records are receipt-backed and visible only to current group members.</footer>
+    <footer className="savings-disclaimer"><ShieldCheck size={15}/> Savings records are receipt-backed and visible only to current group members.</footer>
     {toast && <div className="toast"><Check size={16}/>{toast}</div>}
     {signOutConfirmationOpen && <div className="modal-backdrop" role="presentation" onClick={() => setSignOutConfirmationOpen(false)}>
       <section className="signout-confirmation" role="alertdialog" aria-modal="true" aria-labelledby="signout-title" aria-describedby="signout-description" onClick={event => event.stopPropagation()}>
@@ -435,7 +512,7 @@ function WorkspaceDashboard({ user, onSignOut, onOpenLedger }: { user: User; onS
   </main>
 }
 
-function Overview({ user, goSend, goWithdraw, goHistory }: { user: User; goSend: () => void; goWithdraw: () => void; goHistory: () => void }) { return <><GroupSavingsOverview user={user} supabase={supabase} onHistory={goHistory}/><div className="section-title"><h2>Sinking funds</h2></div><section className="fund-grid">{funds.map(f => <article className="fund-card" key={f.name}><div className="fund-top"><span className="fund-icon" style={{ background: f.color }}>{f.icon}</span><button className="more" aria-label={`More options for ${f.name}`}>•••</button></div><h3>{f.name}</h3><p className="fund-amount">₱{f.amount.toLocaleString()} <span>/ ₱{f.goal.toLocaleString()}</span></p><div className="progress"><span style={{ width: `${(f.amount / f.goal) * 100}%` }}/></div><p className="fund-meta">{Math.round((f.amount / f.goal) * 100)}% funded</p></article>)}</section><div className="section-title"><h2>Receipt actions</h2></div><section className="quick-grid"><button onClick={goSend}><Landmark size={20}/><span>Record cash in</span><small>Upload a transaction receipt</small></button><button onClick={goWithdraw}><UsersRound size={20}/><span>Record withdrawal</span><small>Upload a transaction receipt</small></button><button onClick={goHistory}><History size={20}/><span>Receipt history</span><small>Member-only evidence</small></button></section></> }
+function Overview({ user, goSend, goWithdraw, goHistory }: { user: User; goSend: () => void; goWithdraw: () => void; goHistory: () => void }) { return <><GroupSavingsOverview user={user} supabase={supabase} onHistory={goHistory}/><SinkingFunds supabase={supabase}/><div className="section-title"><h2>Receipt actions</h2></div><section className="quick-grid"><button onClick={goSend}><Landmark size={20}/><span>Record cash in</span><small>Upload a transaction receipt</small></button><button onClick={goWithdraw}><UsersRound size={20}/><span>Record withdrawal</span><small>Upload a transaction receipt</small></button><button onClick={goHistory}><History size={20}/><span>Receipt history</span><small>Member-only evidence</small></button></section></> }
 function RailSelect({ rail, setRail }: { rail: Rail; setRail: (v: Rail) => void }) { return <label className="select-label">Destination rail<select value={rail} onChange={e => setRail(e.target.value as Rail)}>{(['GoTyme Bank', 'Maya', 'GCash'] as Rail[]).map(x => <option key={x}>{x}</option>)}</select></label> }
 function TransferPanel({ onComplete, receipt }: { onComplete: (kind: ReceiptType['kind'], rail: Rail, amount: number, target: string) => void; receipt: ReceiptType | null }) { const [amount, setAmount] = useState(''), [rail, setRail] = useState<Rail>('GoTyme Bank'); const valid = Number(amount) > 0 && Number(amount) <= 113000; const submit = (e: React.FormEvent) => { e.preventDefault(); if (valid) onComplete('Send cash', rail, Number(amount), `${GROUP_ACCOUNT.label} ${mask(GROUP_ACCOUNT.last4)}`) }; return <section className="transfer-layout"><div className="transfer-main">{receipt?.kind === 'Send cash' ? <ReceiptView receipt={receipt}/> : <><div className="view-heading"><div><p className="eyebrow">MULTI-RAIL SEND</p><h2>Send cash</h2><p>Debug connector routing for GoTyme, Maya, and GCash.</p></div><span className="secure-tag"><LockKeyhole size={14}/> Debug only</span></div><div className="sandbox-notice"><CircleAlert size={19}/><div><strong>Debug simulation is enforced</strong><p>No banking API is called, no provider balance can change, and all IDs are Bankada debug values—not GoTyme, Maya, or GCash references.</p></div></div><form className="transfer-form" onSubmit={submit}><section className="account-card locked"><div className="account-icon gotyme"><Landmark size={20}/></div><div><span>FROM · GROUP SAVINGS</span><strong>{GROUP_ACCOUNT.label}</strong><p>{mask(GROUP_ACCOUNT.last4)}</p></div><LockKeyhole className="account-lock" size={18}/></section><div className="transfer-arrow">↓</div><RailSelect rail={rail} setRail={setRail}/><label className="amount-label">Amount to send <div className="amount-field"><span>₱</span><input type="number" min="1" max="113000" step="0.01" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)}/></div><small>Available in simulated group savings: ₱113,000.00</small></label><button className="send-button" disabled={!valid}>Simulate send through {rail}</button></form></>}</div><aside className="security-panel"><ShieldCheck size={25}/><h3>Release safeguards</h3><ul><li>All members must authorize a withdrawal.</li><li>Destination ownership must be verified server-side.</li><li>Only verified provider webhooks may settle transfers.</li><li>Unknown provider events alert every group member.</li><li>Receipts require owner-only access controls.</li></ul><p>Debug Mode cannot be switched off by this interface.</p></aside></section> }
 function WithdrawalPanel({ withdrawal, receipt, onCreate, onConsent, onUnknown, alert }: { withdrawal: { amount: number; rail: Rail; consents: number } | null; receipt: ReceiptType | null; onCreate: (a: number, r: Rail) => void; onConsent: () => void; onUnknown: () => void; alert: LedgerItem | null }) { const [amount, setAmount] = useState(''), [rail, setRail] = useState<Rail>('GoTyme Bank'); const valid = Number(amount) > 0 && Number(amount) <= 113000; return <section className="transfer-layout"><div className="transfer-main">{receipt?.kind === 'Group withdrawal' ? <ReceiptView receipt={receipt}/> : <><div className="view-heading"><div><p className="eyebrow">GROUP-CONSENT WITHDRAWAL</p><h2>Withdraw from group savings</h2><p>Cash is never released until every active group member consents.</p></div><span className="secure-tag"><UsersRound size={14}/> 5 of 5 required</span></div><div className="sandbox-notice"><CircleAlert size={19}/><div><strong>Debug simulation is enforced</strong><p>No banking API is called, no provider balance can change, and all IDs are Bankada debug values—not GoTyme, Maya, or GCash references.</p></div></div>{withdrawal ? <section className="consent-card"><UsersRound size={25}/><p className="eyebrow">PENDING APPROVAL</p><h3>{money(withdrawal.amount)} to your {withdrawal.rail} destination</h3><p>Consent is simulated sequentially for this debug session. A production system requires each member’s signed approval on the server.</p><div className="member-list">{MEMBERS.map((name, i) => <span className={i < withdrawal.consents ? 'consented' : ''} key={name}>{i < withdrawal.consents ? <Check size={13}/> : <span className="pending-dot"/>}{name}</span>)}</div><strong className="approval-count">{withdrawal.consents} of {MEMBERS.length} consents recorded</strong><button className="send-button" onClick={onConsent}>Simulate next member consent</button></section> : <form className="transfer-form" onSubmit={e => { e.preventDefault(); if (valid) onCreate(Number(amount), rail) }}><section className="account-card locked"><div className="account-icon gotyme"><Landmark size={20}/></div><div><span>ORIGIN · IMMUTABLE</span><strong>GoTyme Bank · Bankada group savings</strong><p>{mask(GROUP_ACCOUNT.last4)}</p></div><LockKeyhole className="account-lock" size={18}/></section><div className="transfer-arrow">↓</div><RailSelect rail={rail} setRail={setRail}/><label className="amount-label">Withdrawal amount <div className="amount-field"><span>₱</span><input type="number" min="1" max="113000" step="0.01" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)}/></div></label><button className="send-button" disabled={!valid}>Request unanimous consent</button></form>}</>}<section className="unknown-section"><div><AlertTriangle size={20}/><div><strong>Test unidentified withdrawal alert</strong><p>Simulates a provider webhook for an external or unrecognized withdrawal. It does not contact a bank.</p></div></div><button className="outline-button" onClick={onUnknown}>Simulate alert</button>{alert && <article className="unknown-alert"><AlertTriangle size={19}/><div><strong>Alert sent to all group members</strong><div className="receipt-row"><span>Transfer method</span><div><strong>Unidentified external withdrawal</strong></div></div><div className="receipt-row"><span>Date & time</span><div><strong>{alert.time}</strong></div></div><div className="receipt-row"><span>Trace ID</span><div><strong>{alert.traceId ?? 'Not available in debug event'}</strong></div></div><div className="receipt-row"><span>Reference no.</span><div><strong>{alert.referenceNo ?? 'Not available in debug event'}</strong></div></div><div className="receipt-row"><span>Total transferred</span><div><strong>{money(alert.amount)}</strong></div></div><div className="receipt-row"><span>Account / mobile used</span><div><strong>Unidentified — masked pending investigation</strong></div></div><div className="receipt-row"><span>Origin bank account</span><div><strong>GoTyme Bank {mask(GROUP_ACCOUNT.last4)}</strong></div></div></div></article>}</section></div><aside className="security-panel"><ShieldCheck size={25}/><h3>Release safeguards</h3><ul><li>All members must authorize a withdrawal.</li><li>Destination ownership must be verified server-side.</li><li>Only verified provider webhooks may settle transfers.</li><li>Unknown provider events alert every group member.</li><li>Receipts require owner-only access controls.</li></ul><p>Debug Mode cannot be switched off by this interface.</p></aside></section> }
@@ -494,7 +571,7 @@ function App() {
     }
     return workspaceOpen
       ? <WorkspaceDashboard user={user} onOpenLedger={() => setWorkspaceOpen(false)} onSignOut={() => void signOut()}/>
-      : <LedgerDashboard onOpenWorkspace={() => setWorkspaceOpen(true)} onSignOut={() => void signOut()}/>
+      : <LedgerDashboard user={user} onOpenWorkspace={() => setWorkspaceOpen(true)} onSignOut={() => void signOut()}/>
   }
   return <LandingPage user={user} passwordRecovery={passwordRecovery} onPasswordResetComplete={() => {
     setPasswordRecovery(false)

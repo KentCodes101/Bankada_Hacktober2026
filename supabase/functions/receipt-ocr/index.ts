@@ -25,6 +25,13 @@ function referenceFromText(text: string) {
   return match?.[1] ?? "";
 }
 
+function paymentMethodFromText(text: string) {
+  if (/gotyme/i.test(text)) return "GoTyme";
+  if (/gcash/i.test(text)) return "GCash";
+  if (/\bmaya\b/i.test(text)) return "Maya";
+  return "Not specified";
+}
+
 async function sha256(value: Uint8Array) {
   const digest = await crypto.subtle.digest("SHA-256", value);
   return Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, "0")).join("");
@@ -38,8 +45,8 @@ Deno.serve(async request => {
   const authorization = request.headers.get("Authorization");
   if (!authorization?.startsWith("Bearer ")) return json({ error: "Authentication required." }, 401);
   let body: unknown; try { body = await request.json(); } catch { return json({ error: "Request body must be valid JSON." }, 400); }
-  if (!isRecord(body) || typeof body.groupId !== "string" || typeof body.receiptPath !== "string" || (body.direction !== "cash_in" && body.direction !== "withdrawal") || typeof body.paymentMethod !== "string") return json({ error: "Receipt transaction details are invalid." }, 400);
-  if (body.paymentMethod.trim().length < 2 || body.paymentMethod.trim().length > 100) return json({ error: "Enter the payment method used." }, 400);
+  if (!isRecord(body) || typeof body.groupId !== "string" || typeof body.receiptPath !== "string" || (body.direction !== "cash_in" && body.direction !== "withdrawal") || (body.paymentMethod !== undefined && typeof body.paymentMethod !== "string")) return json({ error: "Receipt transaction details are invalid." }, 400);
+  if (typeof body.paymentMethod === "string" && (body.paymentMethod.trim().length < 2 || body.paymentMethod.trim().length > 100)) return json({ error: "Payment method is invalid." }, 400);
 
   const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } }, auth: { persistSession: false, autoRefreshToken: false } });
   const { data: { user }, error: userError } = await caller.auth.getUser(authorization.slice(7));
@@ -91,7 +98,7 @@ Deno.serve(async request => {
   const { error: textUploadError } = await admin.storage.from("group-receipts").upload(textPath, new Blob([ocrText], { type: "text/plain;charset=utf-8" }), { contentType: "text/plain;charset=utf-8", upsert: false });
   if (textUploadError) return json({ error: "Could not save the receipt transcription." }, 500);
   const { data: recordedId, error: recordError } = await admin.rpc("record_group_receipt_transaction", {
-    p_group_id: body.groupId, p_submitted_by: user.id, p_direction: body.direction, p_amount_minor: amountMinor, p_payment_method: body.paymentMethod.trim(), p_transaction_reference: referenceFromText(ocrText), p_occurred_at: new Date().toISOString(), p_receipt_image_path: body.receiptPath, p_receipt_text_path: textPath, p_receipt_sha256: receiptHash, p_ocr_text: ocrText,
+    p_group_id: body.groupId, p_submitted_by: user.id, p_direction: body.direction, p_amount_minor: amountMinor, p_payment_method: typeof body.paymentMethod === "string" ? body.paymentMethod.trim() : paymentMethodFromText(ocrText), p_transaction_reference: referenceFromText(ocrText), p_occurred_at: new Date().toISOString(), p_receipt_image_path: body.receiptPath, p_receipt_text_path: textPath, p_receipt_sha256: receiptHash, p_ocr_text: ocrText,
   });
   if (recordError) {
     console.error("Unable to record receipt transaction", recordError);

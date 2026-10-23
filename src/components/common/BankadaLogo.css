@@ -1,0 +1,8 @@
+.bankada-logo{display:inline-flex;align-items:center;gap:9px;min-width:0;vertical-align:middle;line-height:1}
+.bankada-logo-image-wrap{position:relative;display:grid;place-items:center;flex:0 0 auto;aspect-ratio:1/1;overflow:hidden;border-radius:50%;background:rgba(24,73,169,.08)}
+.bankada-logo-image-wrap img{display:block;width:100%;height:100%;aspect-ratio:1/1;object-fit:contain;object-position:center;border-radius:50%}
+.bankada-logo-sm .bankada-logo-image-wrap{width:32px;height:32px}
+.bankada-logo-md .bankada-logo-image-wrap{width:40px;height:40px}
+.bankada-logo-lg .bankada-logo-image-wrap{width:56px;height:56px}
+.bankada-logo-xl .bankada-logo-image-wrap{width:80px;height:80px}
+.bankada-logo-text{white-space:nowrap}
