@@ -19,8 +19,6 @@ export function Dashboard({ user, onOpenWorkspace, onSignOut }: DashboardProps) 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const data = useReceiptDashboardData()
   const progress = data.fund?.target ? Math.min(100, (data.total / data.fund.target) * 100) : 0
-  const accountName = import.meta.env.VITE_DESIGNATED_ACCOUNT_NAME || 'Designated group account'
-  const accountNumber = import.meta.env.VITE_DESIGNATED_ACCOUNT_NUMBER || 'Ask your group admin for the account number'
   const chartColors = ['#1849A9', '#38BDF8', '#FFCBA2', '#73B58A', '#9A7BC1', '#F18C72']
   const largestContributors = data.memberContributions.slice(0, 5)
   const remainingContributors = data.memberContributions.slice(5)
@@ -135,12 +133,6 @@ export function Dashboard({ user, onOpenWorkspace, onSignOut }: DashboardProps) 
       </article>
     </section>
 
-    <section className="ledger-account-card" aria-labelledby="designated-account-title">
-      <div className="ledger-account-icon"><i className="fa-solid fa-landmark icon-fa" aria-hidden="true" /></div>
-      <div className="ledger-account-copy"><p className="ledger-eyebrow">DESIGNATED EXTERNAL ACCOUNT</p><h2 id="designated-account-title">{accountName}</h2><p>{accountNumber}</p></div>
-      <span className="external-tag"><i className="fa-solid fa-arrow-up-right-from-square icon-fa" aria-hidden="true" /> External</span>
-      <p className="ledger-funds-disclaimer"><i className="fa-solid fa-shield-halved icon-fa" aria-hidden="true" /> Funds stay in this external account. Bankada only tracks submitted receipts and ledger entries.</p>
-    </section>
 
     <section className="ledger-activity" aria-labelledby="ledger-activity-title">
       <div className="ledger-activity-heading"><div><p className="ledger-eyebrow">THE PAPER TRAIL</p><h2 id="ledger-activity-title">Recent ledger activity</h2></div><button className="ledger-filter" type="button"><span>All activity</span><i className="fa-solid fa-chevron-down icon-fa" aria-hidden="true" /></button></div>
