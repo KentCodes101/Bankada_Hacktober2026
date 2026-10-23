@@ -1,0 +1,110 @@
+/* Dashboard theme overrides. */
+.ledger-dashboard {
+  --ink: var(--color-text-main);
+  --muted: var(--color-text-muted);
+  --line: var(--color-border-subtle);
+  --green: var(--color-royal-blue);
+  --mint: var(--color-sky-blue);
+  color: var(--color-text-main);
+}
+.ledger-topbar { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.72); border-radius: 0 0 20px 20px; margin: 0 -32px; padding: 0 32px; }
+.ledger-brand { color: #0A2540; }
+.ledger-intro h1 { color: var(--color-text-main); font-weight: 800; letter-spacing: -1.5px; }
+.ledger-eyebrow, .ledger-card-label { color: var(--color-text-muted); font-size: 11px; font-weight: 700; letter-spacing: 1.2px; }
+.ledger-mode { color: #1849A9; border-color: #C7D9F8; background: rgba(255, 255, 255, 0.65); }
+.ledger-mode > span { background: #1849A9; }
+.ledger-topbar-right { color: #64748B; }
+.ledger-icon.goal { background: var(--color-peach-orange); color: #5C4006; }
+.ledger-card-label, .ledger-eyebrow { color: var(--color-text-muted); }
+.ledger-progress-track span { background: linear-gradient(90deg, #1849A9 0%, #2563EB 100%); }
+.ledger-account-icon { background: var(--color-sky-blue); color: var(--color-brand-primary); }
+.external-tag { background: var(--color-sky-blue); color: var(--color-brand-primary); }
+.ledger-message.notice { border: 1px solid #E8D69F; background: var(--color-sand-yellow); color: #5C4006; }
+.receipt-status.verified, .ledger-amount { color: var(--color-brand-primary); }
+.ledger-footer a { color: var(--color-brand-primary); }
+.ledger-dashboard { background: transparent; }
+.ledger-goal-card, .ledger-account-card, .ledger-activity { border-color: var(--color-border-subtle); }
+.ledger-goal-card, .ledger-account-card, .ledger-activity {
+  border-radius: 20px;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 16px 32px -4px rgba(10, 37, 64, 0.12), 0 6px 16px -2px rgba(10, 37, 64, 0.08) !important;
+}
+.ledger-dashboard h1, .ledger-dashboard h2, .ledger-dashboard h3 { color: #0A2540; }
+.ledger-goal-card { background: linear-gradient(180deg, #FFFFFF 0%, #F0F5FF 100%); border: 1.5px solid #C7D9F8; }
+.ledger-account-card, .ledger-activity { background: #FFFFFF; }
+
+/* Full-width balance hero with a two-column goal row beneath it. */
+.ledger-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.ledger-balance-card {
+  grid-column: 1 / -1;
+  padding: 24px 26px;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(135deg, #0A2540 0%, #1849A9 100%) !important;
+  box-shadow: 0 18px 36px -6px rgba(10, 37, 64, 0.2), 0 8px 16px -4px rgba(10, 37, 64, 0.12) !important;
+  color: #fff;
+}
+.ledger-balance-eyebrow { margin: 0 0 18px; color: rgba(255, 255, 255, 0.75); font-size: 11px; font-weight: 700; letter-spacing: 1.2px; }
+.ledger-balance-total { display: block; color: #fff; font: 700 clamp(30px, 4vw, 40px)/1.15 "Fredoka", sans-serif; letter-spacing: -.8px; }
+.ledger-balance-caption { margin: 7px 0 0; color: rgba(255, 255, 255, 0.75); font-size: 12px; }
+.ledger-goal-card { background: #fff !important; border: 1px solid #E2E8F0 !important; }
+.ledger-contribution-card {
+  display: flex;
+  min-width: 0;
+  min-height: 190px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+  box-shadow: 0 16px 32px -4px rgba(10, 37, 64, 0.12), 0 6px 16px -2px rgba(10, 37, 64, 0.08) !important;
+}
+.ledger-contribution-copy { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 8px; }
+.ledger-contribution-copy .ledger-card-label { margin: 0; }
+.ledger-contribution-copy strong { color: #0A2540; font: 700 clamp(23px, 3vw, 32px)/1.15 "Fredoka", sans-serif; letter-spacing: -.6px; }
+.ledger-contribution-copy small { color: #64748B; font-size: 11px; line-height: 1.45; }
+.ledger-member-legend { display: grid; width: 100%; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+.ledger-member-legend li, .ledger-member-legend-name { display: flex; align-items: center; }
+.ledger-member-legend li { justify-content: space-between; gap: 8px; color: #64748B; font-size: 12px; line-height: 1.35; }
+.ledger-member-legend-name { min-width: 0; gap: 7px; }
+.ledger-member-legend-name i { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; }
+.ledger-member-legend-value { flex: 0 0 auto; color: #64748B; font-size: 11px; white-space: nowrap; }
+.ledger-contribution-ring {
+  position: relative;
+  display: grid;
+  width: 112px;
+  height: 112px;
+  flex: 0 0 112px;
+  place-items: center;
+  border-radius: 50%;
+}
+.ledger-contribution-ring svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ledger-contribution-track, .ledger-contribution-arc { fill: none; stroke-width: 10; }
+.ledger-contribution-track { stroke: #E8EEF8; }
+.ledger-contribution-arc { stroke-linecap: round; }
+.ledger-contribution-ring span { position: relative; z-index: 1; color: #0A2540; font: 700 20px "Fredoka", sans-serif; }
+.ledger-contribution-ring span { position: absolute; inset: 0; display: grid; place-items: center; }
+@media (max-width: 700px) {
+  .ledger-summary-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 440px) {
+  .ledger-balance-card { padding: 20px; }
+  .ledger-contribution-card { padding: 18px; gap: 12px; }
+  .ledger-contribution-ring { width: 92px; height: 92px; flex-basis: 92px; }
+  .ledger-contribution-ring span { font-size: 17px; }
+}
+ .ledger-workspace-button {
+  border: 1px solid #d7e1ef;
+  border-radius: 999px;
+  background: #fff;
+  color: #173b70;
+  cursor: pointer;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  padding: .48rem .78rem;
+}
+
+.ledger-workspace-button:hover { background: #edf5ff; }

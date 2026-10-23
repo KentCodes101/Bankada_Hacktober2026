@@ -161,6 +161,11 @@ export async function POST(request: Request) {
     if (authError || !user) {
       return Response.json({ error: "Authentication required." }, { status: 401 });
     }
+    if (!user.email || !user.email_confirmed_at ||
+        typeof user.user_metadata.full_name !== "string" || !user.user_metadata.full_name.trim() ||
+        typeof user.user_metadata.avatar_emoji !== "string" || !user.user_metadata.avatar_emoji.trim()) {
+      return Response.json({ error: "Verified email and completed profile are required." }, { status: 403 });
+    }
 
     // RLS-hidden funds produce no row, so missing and unauthorized fund IDs
     // both stop here, before any request is sent to OpenAI.

@@ -1,44 +1,53 @@
 # Bankada
 
-Bankada is a mobile-first group money manager for shared sinking funds, receipt capture, collaborative withdrawal approvals, and budget-aware trip planning.
+Bankada is a receipt-backed group-savings tracker. It does **not** connect to bank/e-wallet accounts, read external activity, or transfer money. A group balance changes only when a current member uploads a complete transaction screenshot for a cash-in or withdrawal.
 
-## Product direction
+Each recorded transaction stores:
 
-- Cross-platform mobile delivery: Expo/React Native can consume this TypeScript UI and ship to iPhone and Android.
-- Online sync: use Supabase Auth, Postgres, Row Level Security, and Realtime for group membership and shared balances.
-- Receipt intelligence: keep OpenAI API keys server-side and send receipt images through a protected edge function for structured extraction.
-- Safe withdrawals: use an immutable approval ledger, threshold rules, and idempotent transaction records.
-- Trip planning: calculate options from available fund balance, target dates, and per-member contribution capacity.
+- the original private screenshot;
+- OCR.space’s extracted text as a private `.txt` file;
+- OCR-derived amount and reference when readable;
+- the member-selected payment method (GoTyme, Maya, GCash, or any other bank/e-wallet);
+- the direction, submitting member, and recording time.
+
+Only current members of that group can view the history, screenshot, or OCR text. Receipt transactions are append-only; corrections require a new receipt-backed entry.
 
 ## Local development
 
 ```bash
 npm install
-npm run dev
+npm.cmd run dev
 ```
 
-The current slice is a responsive product prototype with working tab navigation, approval interaction, receipt-scan action, and mobile layout. Production integrations should be added through an API boundary rather than exposing secrets in the client.
+Create `.env` for browser authentication only:
 
-## GoTyme transfer sandbox
+```env
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+```
 
-The **Transfers** tab now contains a GoTyme storage-transfer experience. It is deliberately a local-only sandbox: it makes no network request, does not change any wallet or bank balance, and uses `DBG-*` identifiers rather than pretending to issue GoTyme trace IDs or reference numbers. Receipts are held only in React memory for the active page session and display masked account identifiers.
+The default authenticated view is the responsive receipt ledger dashboard. It shows the group balance, goal progress, member contribution chart, and recent receipt activity using the receipt-backed group-savings RPCs. Select **Manage group** to open group setup, receipt recording, history, and trip-planning tools.
 
-Before enabling real transfers, implement these controls on the server (not in this client):
+## Deploy receipt-backed savings
 
-- Authenticate every request and use database row-level security so only the transfer owner and explicitly authorized support roles can read a receipt.
-- Keep the GoTyme destination account in server configuration or a restricted database table; never accept it from the browser and never expose a mutation endpoint to ordinary users.
-- Create a pending transfer with an idempotency key, then call an approved GoTyme/payment-partner API from a secrets-managed server environment. Verify signed provider webhooks before marking a transfer successful.
-- Persist only provider-returned trace/reference numbers, use an append-only audit ledger, encrypt sensitive values at rest, and redact account numbers from application logs.
-- Enforce authorization, step-up authentication, rate limits, velocity limits, amount limits, reconciliation, monitoring, and a failure/reversal workflow before funds are made available.
+Apply the Supabase migrations in order, including [`20261022040000_group_savings_receipts.sql`](./supabase/migrations/20261022040000_group_savings_receipts.sql), then deploy the edge functions:
 
-## Debug withdrawals, consent, and multi-rail routing
+```bash
+supabase db push
+supabase functions deploy receipt-ocr
+```
 
-The app is currently **locked in Debug Mode**. Its Send Cash flow exposes simulated routing choices for GoTyme, Maya, and GCash, while Withdrawals demonstrates a five-member unanimous-consent workflow. The simulated consent button exists only to exercise the interface; it is not an approval mechanism and cannot release funds. All receipts, provider-like IDs, history entries, and unidentified-withdrawal alerts are session-only demonstrations.
+Set these secrets in Supabase. Never put any of them in a Vite environment file or repository:
 
-The History screen contains a simulated hash per event to make the audit-trail UX testable. This is **not a blockchain** and cannot provide immutability from a browser. Do not put account numbers, personal information, provider secrets, or receipts on a public blockchain. A production system should instead use an append-only server ledger (hash-linked, encrypted, access controlled, and regularly reconciled) and, only if a genuine compliance need exists, anchor a digest of a batch to a permissioned ledger under legal/security review.
+```text
+OCR_SPACE_API_KEY=<your OCR.space API key>
+APP_ORIGIN=https://your-bankada-app.example
+```
 
-For live GoTyme, Maya, or GCash support, Bankada needs written commercial/API access for each provider. The server should normalize those provider APIs behind one connector interface; store credentials in a secrets manager; use per-provider idempotency keys and destination verification; verify signed webhooks; independently reconcile source-account transactions; and create a high-severity incident when an observed withdrawal has no matching Bankada authorization. The incident must notify all group members with masked fields, freeze further releases where appropriate, preserve the raw event securely, and escalate to provider support and the group according to the approved incident policy.
+The `receipt-ocr` function verifies the authenticated member, accepts only PNG/JPG/WebP screenshots under 8 MB, sends the screenshot to OCR.space over HTTPS, stores the OCR text in the private `group-receipts` bucket, and appends the transaction only after OCR identifies a positive amount. The original screenshot and text file are protected by group-member storage policies.
 
-## Build quality checklist
+OCR is extraction, not proof of payment. Members should review every receipt, and the product must clearly disclose that receipt screenshots are sent to OCR.space. OCR.space documents file upload/base64 OCR requests and returns parsed text in JSON. [OCR.space API documentation](https://ocr.space/ocrapi)
 
-Documentation (30%), technical soundness (60%), and infrastructure/deployment (10%) are reflected in the project structure and roadmap. Before production: add unit/component tests, Supabase migrations and RLS policies, CI, error monitoring, accessibility checks, and App Store/Play Store release configuration.
+## Group limits and deletion
+
+Users can be members of up to five groups; groups can have up to ten members. Members join with a daily eight-letter code. The owner may schedule a group for deletion; all current members receive an in-app Bankada notification and the deletion becomes eligible after three days. Configure a Supabase Cron **Database function** job to run `public.finalize_due_barkada_group_deletions` every 15 minutes so finalisation does not depend on anyone visiting the app. The owner may cancel while the three-day window is still open.

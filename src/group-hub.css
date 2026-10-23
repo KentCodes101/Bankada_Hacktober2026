@@ -1,0 +1,43 @@
+.group-hub{padding:10px 0 26px}
+.group-hub-heading,.group-section-heading{display:flex;align-items:center;justify-content:space-between}
+.group-hub-heading{margin-bottom:22px;color:#1c9a62}
+.group-hub-heading h2{color:#17211d;font:700 23px "Plus Jakarta Sans";margin:0 0 6px}
+.group-hub-heading p:last-child{color:#7b8983;margin:0;font-size:13px}
+.group-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.group-tool-card{display:flex;flex-direction:column;align-items:flex-start;gap:12px;background:#fff;border:1px solid #e5ece7;border-radius:15px;padding:19px}
+.group-tool-icon,.group-row-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:11px;background:#e7f6ef;color:#1c9a62}
+.group-tool-card h3,.group-list-section h3{font:700 15px "Plus Jakarta Sans";margin:0;color:#17211d}
+.group-tool-card>p{color:#7b8983;font-size:12px;line-height:1.5;margin:-5px 0 0;min-height:37px}
+.group-tool-card .auth-field{width:100%;margin-top:auto}
+.group-tool-card .send-button{width:100%;display:flex;align-items:center;justify-content:center;gap:6px}
+.visibility-choice{display:flex;align-items:flex-start;gap:9px;color:#46564e;font-size:12px;line-height:1.4}
+.visibility-choice input{margin:2px 0 0;accent-color:#1c9a62}
+.visibility-choice span,.visibility-choice small{display:block}
+.visibility-choice small{color:#829089;margin-top:3px;font-size:11px}
+.group-list-section{margin-top:27px}
+.group-list-section>h3,.group-section-heading h3{font:700 16px "Plus Jakarta Sans";margin:0 0 12px;color:#17211d}
+.group-section-heading h3{margin:0 0 12px}
+.group-list{display:flex;flex-direction:column;gap:9px}
+.group-row{display:flex;align-items:center;gap:12px;padding:13px 15px;background:#fff;border:1px solid #e5ece7;border-radius:12px}
+.group-row-icon{width:36px;height:36px}
+.group-row-icon.avatar-emoji{font-size:20px}
+.group-row-main{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.group-row-main strong{font-size:13px;color:#1e2d26}
+.group-row-main small{font-size:11px;color:#829089}
+.group-row .outline-button{white-space:nowrap}
+.group-status{display:inline-flex;align-items:center;gap:4px;color:#1a8e59;font-weight:700;font-size:11px;white-space:nowrap}
+.group-status.pending{color:#a76b28}
+.group-empty{padding:18px;background:#fff;border:1px dashed #dce6df;border-radius:12px;color:#7b8983;font-size:13px;line-height:1.6}
+.copy-invite,.group-refresh{display:flex;align-items:center;gap:6px;border:1px solid #dce5df;border-radius:8px;background:#fff;padding:8px 10px;color:#355345;font:600 11px "DM Sans";cursor:pointer}
+.copy-invite:hover,.group-refresh:hover{border-color:#1c9a62;color:#166534}
+.group-refresh:disabled{opacity:.6;cursor:wait}
+.group-message{border-radius:9px;padding:11px 13px;font-size:12px;line-height:1.5;margin:0 0 14px}
+.group-message.error{color:#a72c2c;background:#fff0ef;border:1px solid #f2cfca}
+.group-message.success{color:#17643d;background:#edf8f0;border:1px solid #d0ebd8}
+.group-review-actions{display:flex;align-items:center;gap:7px}
+.group-review-actions .send-button,.group-review-actions .outline-button{padding:8px 10px;font-size:11px}
+.group-limit{color:#64736b;font-size:11px;line-height:1.5}.group-invite-confirm{display:flex;align-items:center;gap:12px;padding:14px 16px;margin:0 0 17px;background:#edf8f0;border:1px solid #cee9d8;border-radius:12px;color:#255840}.group-invite-confirm>div{flex:1}.group-invite-confirm strong{font-size:13px}.group-invite-confirm p{margin:3px 0 0;font-size:11px}.group-invite-confirm input{width:86px;border:1px solid #c9d7ce;border-radius:8px;padding:8px;font:600 13px "DM Sans";letter-spacing:1px}.group-management-list{display:grid;gap:12px}.group-management-card{background:#fff;border:1px solid #e5ece7;border-radius:14px;padding:16px}.group-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.group-card-heading>div{display:grid;gap:4px}.group-card-heading strong{font:700 15px "Plus Jakarta Sans";color:#1d2f26}.group-card-heading small{font-size:11px;color:#829089}.group-members{display:flex;gap:10px;align-items:flex-start;margin-top:13px;padding-top:12px;border-top:1px solid #edf1ee;color:#607168;font-size:11px}.group-members>span{font-weight:700;min-width:55px}.group-members>div{display:flex;flex-wrap:wrap;gap:6px}.group-members small{background:#f2f7f4;color:#4a6357;padding:4px 6px;border-radius:6px}.group-savings-details{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px}.group-savings-details p{display:flex;align-items:center;gap:6px;color:#345143;font-size:12px;margin:0}.group-savings-details svg{color:#1c9a62}.group-management-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:15px}.group-management-tools label{display:grid;gap:6px;color:#53665c;font-size:11px;font-weight:700}.group-management-tools input{width:100%;box-sizing:border-box;border:1px solid #d5e1d9;border-radius:8px;padding:9px;background:#fff;color:#263a2f;font:12px "DM Sans"}.group-management-tools button{width:max-content;display:flex;align-items:center;gap:5px}.group-bank-link small{font-weight:400;color:#829089;line-height:1.35}
+@media(max-width:900px){.group-tools{grid-template-columns:1fr 1fr}.group-tool-card:last-child{grid-column:span 2}}
+@media(max-width:700px){.group-management-tools{grid-template-columns:1fr}.group-invite-confirm{align-items:flex-start;flex-wrap:wrap}.group-invite-confirm>div{min-width:calc(100% - 36px)}.group-invite-confirm input{margin-left:32px}.group-invite-confirm .send-button{margin-left:auto}}
+@media(max-width:600px){.group-tools{grid-template-columns:1fr}.group-tool-card:last-child{grid-column:auto}.group-row{align-items:flex-start;flex-wrap:wrap}.group-row-main{width:calc(100% - 50px)}.group-row>.outline-button,.group-row>.group-status,.group-row>.copy-invite,.group-review-actions{margin-left:48px}.group-review-actions{width:calc(100% - 48px)}.group-review-actions button{flex:1}.group-card-heading{flex-direction:column}.group-card-heading .group-status{white-space:normal}.group-members{flex-direction:column;gap:5px}}
+.group-members>div>span{display:inline-flex;align-items:center;gap:5px}.group-members .outline-button{padding:4px 7px;font-size:10px;color:#a24b38;border-color:#edc6bd}
