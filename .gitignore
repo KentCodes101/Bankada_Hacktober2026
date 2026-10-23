@@ -6,3 +6,4 @@ dist
 Microsoft/
 *.log
 .DS_Store
+supabase/.temp/

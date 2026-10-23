@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -13,13 +14,14 @@
     "@supabase/supabase-js": "^2.118.0",
     "@vitejs/plugin-react": "latest",
     "lucide-react": "latest",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
+    "react": "latest",
+    "react-dom": "latest",
     "typescript": "latest",
     "vite": "latest"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0"
+    "@types/react-dom": "^19.3.0",
+    "supabase": "^2.121.0"
   }
 }

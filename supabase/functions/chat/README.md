@@ -20,7 +20,7 @@ supabase link --project-ref <your-project-ref>
 supabase functions deploy chat
 ```
 
-JWT verification stays enabled (the default), so unauthenticated callers are rejected by Supabase before the function runs.
+JWT verification stays enabled (the default), so unauthenticated callers are rejected by Supabase before the function runs. The function also rejects users whose email or phone confirmation is incomplete.
 
 ## Behaviour
 
