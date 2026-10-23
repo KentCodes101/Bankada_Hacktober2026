@@ -10,7 +10,7 @@ const demoContributions: Contribution[] = [
   { id: 'demo-2', contributor_name: 'Jasmine Reyes', user_id: 'demo-member', amount: 1800, created_at: new Date(Date.now() - 86400000).toISOString(), receipt_url: null, receipt_verified: true },
   { id: 'demo-3', contributor_name: 'Alex Santos', user_id: 'demo-other', amount: 1200, created_at: new Date(Date.now() - 172800000).toISOString(), receipt_url: null, receipt_verified: false },
 ]
-const demoData: DashboardData = { name: 'Kent Mendoza', role: 'Contributor', personalTotal: 2500, fund: { id: '', name: 'Japan trip', target: 80000, currency: 'PHP' }, contributions: demoContributions, memberContributions: [{ userId: 'demo-user', name: 'Kent Mendoza', amount: 2500 }, { userId: 'demo-member', name: 'Jasmine Reyes', amount: 1800 }, { userId: 'demo-other', name: 'Alex Santos', amount: 1200 }], total: 5500, isDemo: true, loading: false, message: 'Demo data shown. Sign in to load your group’s receipt-backed ledger.' }
+const demoData: DashboardData = { name: 'Kent Mendoza', role: 'Contributor', personalTotal: 2500, fund: null, contributions: demoContributions, memberContributions: [{ userId: 'demo-user', name: 'Kent Mendoza', amount: 2500 }, { userId: 'demo-member', name: 'Jasmine Reyes', amount: 1800 }, { userId: 'demo-other', name: 'Alex Santos', amount: 1200 }], total: 5500, isDemo: true, loading: false, message: 'Demo data shown. Sign in to load your group’s receipt-backed ledger.' }
 
 type SavingsGroup = { group_id: string; group_name: string; role: string; savings_target_minor: number; balance_minor: number; currency: string }
 type Receipt = { transaction_id: string; direction: 'cash_in' | 'withdrawal'; amount_minor: number; occurred_at: string; submitted_by_name: string }
@@ -29,9 +29,18 @@ export function useReceiptDashboardData(): DashboardData {
       if (authError || !user) { if (active) setData({ ...demoData, message: 'Sign in to load your live group ledger. The figures below are demo data.' }); return }
       const name = String(user.user_metadata?.full_name ?? user.email ?? 'Bankada member')
       const { data: groups, error: groupError } = await api.rpc('list_my_group_savings')
-      const group = (groups?.[0] ?? null) as SavingsGroup | null
+      const preferredGroupId = window.localStorage.getItem('bankada-active-group-id')
+      const group = ((groups ?? []).find((item: SavingsGroup) => item.group_id === preferredGroupId) ?? groups?.[0] ?? null) as SavingsGroup | null
       if (groupError || !group) { if (active) setData({ ...demoData, name, role: 'Member', isDemo: false, contributions: [], memberContributions: [], total: 0, personalTotal: 0, fund: null, message: groupError?.message ?? 'No group savings fund is linked to this account yet.' }); return }
       const [{ data: history, error: historyError }, { data: members }] = await Promise.all([api.rpc('list_group_receipt_history', { p_group_id: group.group_id, p_limit: 30 }), api.rpc('list_barkada_members', { p_group_id: group.group_id })])
+      const { data: activeGoal } = await api.from('funds').select('id,goal_name,target_amount,currency').eq('group_id', group.group_id).order('created_at', { ascending: false }).limit(1).maybeSingle()
+      type CachedGoal = { id: string | number; group_id: string; goal_name: string; target_amount: number; currency?: string | null }
+      let localGoal: CachedGoal | null = null
+      try {
+        const cached: unknown = JSON.parse(window.localStorage.getItem('bankada-local-sinking-goals') ?? '[]')
+        if (Array.isArray(cached)) localGoal = (cached as CachedGoal[]).find(goal => goal.group_id === group.group_id) ?? null
+      } catch { /* Local demo goal is optional when storage is unavailable. */ }
+      const selectedGoal = activeGoal ?? localGoal
       const receipts = (history ?? []) as Receipt[]
       const memberIds = new Map(((members ?? []) as Member[]).map(member => [member.display_name, member.profile_id]))
       const totals = new Map<string, MemberContributionSummary>()
@@ -46,7 +55,7 @@ export function useReceiptDashboardData(): DashboardData {
         if (contributor === name) personalTotal += amount
       }
       const contributions: Contribution[] = receipts.map(receipt => ({ id: receipt.transaction_id, contributor_name: receipt.submitted_by_name, user_id: memberIds.get(receipt.submitted_by_name) ?? receipt.submitted_by_name, amount: (receipt.direction === 'withdrawal' ? -1 : 1) * Number(receipt.amount_minor) / 100, created_at: receipt.occurred_at, receipt_url: null, receipt_verified: true }))
-      if (active) setData({ name, role: group.role ?? 'Member', personalTotal, fund: { id: group.group_id, name: group.group_name, target: Number(group.savings_target_minor) / 100, currency: group.currency ?? 'PHP' }, contributions, memberContributions: [...totals.values()].sort((left, right) => right.amount - left.amount), total: Number(group.balance_minor) / 100, isDemo: false, loading: false, message: historyError ? `Group loaded, but receipt history could not be loaded: ${historyError.message}` : '' })
+      if (active) setData({ name, role: group.role ?? 'Member', personalTotal, fund: selectedGoal ? { id: String(selectedGoal.id), name: selectedGoal.goal_name, target: Number(selectedGoal.target_amount), currency: selectedGoal.currency ?? 'PHP' } : null, contributions, memberContributions: [...totals.values()].sort((left, right) => right.amount - left.amount), total: Number(group.balance_minor) / 100, isDemo: false, loading: false, message: historyError ? `Group loaded, but receipt history could not be loaded: ${historyError.message}` : '' })
     }
     void load().catch(error => { if (active) setData({ ...demoData, message: error instanceof Error ? error.message : 'Could not load dashboard data.' }) })
     return () => { active = false }

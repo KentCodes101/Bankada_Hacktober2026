@@ -108,3 +108,73 @@
 }
 
 .ledger-workspace-button:hover { background: #edf5ff; }
+
+/* Shared dashboard chrome: Group Savings and Ledger use one navigation system. */
+.topbar,
+.ledger-topbar {
+  min-height: 74px;
+  height: auto;
+  margin: 16px 0 0;
+  padding: 14px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 16px 32px -4px rgba(10, 37, 64, 0.12), 0 6px 16px -2px rgba(10, 37, 64, 0.08) !important;
+  backdrop-filter: blur(12px);
+}
+.ledger-topbar { margin-left: 0; margin-right: 0; }
+.brand,
+.ledger-brand,
+.landing-brand {
+  color: #0A2540 !important;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif !important;
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.4px;
+}
+.brand-mark {
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 0 !important;
+  border-radius: 10px !important;
+  background: transparent url('/bankada-logo.png') center / contain no-repeat !important;
+}
+.ledger-brand-logo { width: 32px; height: 32px; }
+.ledger-topbar-right,
+.top-actions { gap: 10px; }
+.ledger-workspace-button,
+.auth-signout,
+.top-actions button,
+.top-actions .icon-btn {
+  min-height: 36px;
+  border: 1px solid #D7E1EF !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  color: #0A2540 !important;
+  padding: 8px 13px !important;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif !important;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none !important;
+}
+.ledger-workspace-button:hover,
+.auth-signout:hover,
+.top-actions button:hover,
+.top-actions .icon-btn:hover { background: #EDF5FF !important; border-color: #B8CFF5 !important; color: #113888 !important; }
+.ledger-dashboard,
+.ledger-dashboard button,
+.ledger-dashboard input,
+.ledger-dashboard select,
+.ledger-dashboard table {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif !important;
+}
+.ledger-intro,
+.dashboard-hero { margin-top: 32px; }
+.ledger-intro h1,
+.dashboard-hero h1,
+.ledger-balance-total { font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif !important; font-weight: 800 !important; }
+.ledger-intro-sub,
+.ledger-card-label,
+.ledger-eyebrow,
+.ledger-table td,
+.ledger-table th { color: #64748B; }
